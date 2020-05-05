@@ -1,4 +1,4 @@
-package com.example.domain
+package ru.tinkoff.domain
 
 import java.time.ZonedDateTime
 
