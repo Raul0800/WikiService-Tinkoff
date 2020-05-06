@@ -15,3 +15,10 @@ CREATE INDEX "Ind_title"
              ON public."Articles" USING btree
              (title ASC NULLS LAST)
              TABLESPACE pg_default;
+
+create view "Statistic"
+as
+    select category,
+    count(category) as count
+from public."Articles"
+    group by category;

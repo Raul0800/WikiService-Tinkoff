@@ -1,8 +1,9 @@
 package ru.tinkoff.config
 
 import cats.syntax.functor._
-import cats.effect.{Async, Blocker, ContextShift, Resource, Sync}
+import cats.effect.{Async, Blocker, ContextShift, IO, Resource, Sync}
 import doobie.hikari.HikariTransactor
+import io.chrisdavenport.log4cats.Logger
 import org.flywaydb.core.Flyway
 
 import scala.concurrent.ExecutionContext
@@ -27,7 +28,9 @@ object DatabaseConfig {
   /**
     * Runs the flyway migrations against the target database
     */
-  def initializeDb[F[_]](cfg: DatabaseConfig)(implicit S: Sync[F]): F[Unit] =
+  def initializeDb[F[_]](cfg: DatabaseConfig)(
+      implicit S: Sync[F]
+  ): F[Unit] =
     S.delay {
         val fw: Flyway = {
           Flyway

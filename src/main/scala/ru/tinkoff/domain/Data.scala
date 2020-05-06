@@ -14,4 +14,4 @@ final case class Article(
 
 final case class SearchArticle(create_timestamp: Long, timestamp: Long, title: String, auxiliary_text: Array[String])
 
-final case class Catalog(category: Array[String], amount: Int)
+final case class Catalog(category: Array[String], count: Int)

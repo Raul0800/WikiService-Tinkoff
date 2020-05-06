@@ -30,7 +30,9 @@ lazy val root = (project in file("."))
       "org.tpolecat"          %% "doobie-hikari"          % DoobieVersion,
       "com.github.pureconfig" %% "pureconfig"             % "0.12.2",
       "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.12.2",
-      "org.flywaydb"          % "flyway-core"             % FlywayVersion
+      "org.flywaydb"          % "flyway-core"             % FlywayVersion,
+      "io.chrisdavenport"     %% "log4cats-slf4j"         % "0.3.0",
+      "ch.qos.logback"        % "logback-classic"         % "1.2.3"
     )
   )
 
