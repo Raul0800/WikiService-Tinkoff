@@ -15,8 +15,13 @@ import doobie.util.ExecutionContexts
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import pureconfig.generic.semiauto.deriveReader
 import pureconfig.module.catseffect.syntax._
-import ru.tinkoff.repository.{DoobieDownloadInterpreter, DoobieSearchInterpreter, DoobieStatisticRepository}
-import ru.tinkoff.service.{DownloadService, SearchService, StatisticService}
+import ru.tinkoff.repository.{
+  DoobieDeleteInterpreter,
+  DoobieDownloadInterpreter,
+  DoobieSearchInterpreter,
+  DoobieStatisticInterpreter
+}
+import ru.tinkoff.service.{DeleteService, DownloadService, SearchService, StatisticService}
 import io.chrisdavenport.log4cats.Logger
 
 object Server extends IOApp {
@@ -33,10 +38,12 @@ object Server extends IOApp {
       _                <- Resource.liftF(DatabaseConfig.initializeDb[IO](conf.db))
       searchRepo       = DoobieSearchInterpreter(xa)
       downloadRepo     = DoobieDownloadInterpreter(xa)
-      statisticRepo    = DoobieStatisticRepository(xa)
+      statisticRepo    = DoobieStatisticInterpreter(xa)
+      deleteRepo       = DoobieDeleteInterpreter(xa)
       searchService    = SearchService(searchRepo)
       downloadService  = DownloadService(downloadRepo, conf.source)
       statisticService = StatisticService(statisticRepo)
+      deleteService    = DeleteService(deleteRepo)
       server <- BlazeServerBuilder[IO]
                  .bindHttp(conf.server.port, conf.server.host)
                  .withHttpApp(
@@ -44,7 +51,8 @@ object Server extends IOApp {
                      .route(
                        searchService,
                        downloadService,
-                       statisticService
+                       statisticService,
+                       deleteService
                      )
                      .orNotFound
                  )

@@ -1,3 +1,5 @@
+import sbt.Keys.libraryDependencies
+
 val Http4sVersion  = "0.20.8"
 val CirceVersion   = "0.11.1"
 val Specs2Version  = "4.1.0"
@@ -22,7 +24,7 @@ lazy val root = (project in file("."))
       "io.circe"              %% "circe-generic"          % CirceVersion,
       "io.circe"              %% "circe-literal"          % CirceVersion,
       "org.scalactic"         %% "scalactic"              % "3.0.8",
-      "org.scalatest"         %% "scalatest"              % "3.0.8" % "test",
+      "org.scalatest"         %% "scalatest"              % "3.1.1" % "test",
       "io.circe"              %% "circe-parser"           % CirceVersion,
       "org.tpolecat"          %% "doobie-core"            % DoobieVersion,
       "org.tpolecat"          %% "doobie-postgres"        % DoobieVersion,
@@ -32,7 +34,9 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.12.2",
       "org.flywaydb"          % "flyway-core"             % FlywayVersion,
       "io.chrisdavenport"     %% "log4cats-slf4j"         % "0.3.0",
-      "ch.qos.logback"        % "logback-classic"         % "1.2.3"
+      "ch.qos.logback"        % "logback-classic"         % "1.2.3",
+      "org.scalamock"         %% "scalamock"              % "4.4.0" % Test,
+      "org.scalatest"         %% "scalatest"              % "3.1.0" % Test
     )
   )
 

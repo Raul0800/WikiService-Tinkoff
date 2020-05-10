@@ -7,14 +7,15 @@ import io.circe.syntax._
 import org.http4s.HttpRoutes
 import org.http4s.circe.jsonEncoder
 import org.http4s.dsl.Http4sDsl
-import ru.tinkoff.service.{DownloadService, SearchService, StatisticService}
+import ru.tinkoff.service.{DeleteService, DownloadService, SearchService, StatisticService}
 
 object WikiEndpoint extends Http4sDsl[IO] {
 
   def route(
       searchService: SearchService,
       downloadService: DownloadService,
-      statisticService: StatisticService
+      statisticService: StatisticService,
+      deleteService: DeleteService
   ): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "wiki" / nameTitle =>
       searchService
@@ -24,7 +25,7 @@ object WikiEndpoint extends Http4sDsl[IO] {
 
     case GET -> Root / "download" => {
       downloadService.download
-        .flatMap(req => Ok(req.asJson))
+        .flatMap(_ => Ok("Done"))
         .handleErrorWith(_ => InternalServerError("Check paths, file availability, database connection"))
     }
 
@@ -33,5 +34,11 @@ object WikiEndpoint extends Http4sDsl[IO] {
         .flatMap(x => Ok(x.asJson))
         .handleErrorWith(_ => InternalServerError())
     }
+
+    case GET -> Root / "delete" / nameTitle =>
+      deleteService
+        .deleteRecordByTitle(nameTitle)
+        .flatMap(req => Ok(s"Dropped records: ${req.asJson}"))
+        .handleErrorWith(_ => InternalServerError("Probably database problems"))
   }
 }

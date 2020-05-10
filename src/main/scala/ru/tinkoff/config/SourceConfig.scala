@@ -1,7 +1,6 @@
 package ru.tinkoff.config
 
 import java.io.File
-import java.nio.file.{Files, Path}
 
 import cats.effect.IO
 

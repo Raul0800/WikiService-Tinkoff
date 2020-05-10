@@ -2,7 +2,7 @@ package ru.tinkoff.service
 
 import java.io.File
 
-import cats.effect.IO
+import cats.effect.{ExitCode, IO}
 import fs2.Stream
 import ru.tinkoff.config.SourceConfig
 import ru.tinkoff.repository.DoobieDownloadInterpreter
@@ -12,42 +12,44 @@ class DownloadService(repo: DoobieDownloadInterpreter, source: SourceConfig)(
     implicit logger: Logger[IO]
 ) {
 
-  def download: IO[Unit] =
-    for {
-      _ <- Stream
-            .emits {
-              source.paths
-                .flatMap(
-                  name => SourceConfig.getFiles(new File(name))
-                )
-            }
-            .covary[IO]
-            .evalMap { file =>
-              for {
-                _ <- logger.info(s"File name: ${file.getName} start reading")
-                content <- SourceConfig
-                            .readContent(file)
-                            .handleErrorWith { _ =>
-                              logger.warn(s"Read content. Some problems: file - ${file.getName}")
-                              IO("")
-                            }
-                data <- repo
-                         .parseContent(content)
-                         .handleErrorWith { _ =>
-                           logger.warn(s"Parse content. Some problems: file - ${file.getName}")
-                           IO(List.empty)
-                         }
-                _ <- repo
-                      .insertDataToArticle(data)
+  def download: IO[ExitCode] =
+    Stream
+      .emits {
+        source.paths
+          .flatMap(
+            name => SourceConfig.getFiles(new File(name))
+          )
+      }
+      .covary[IO]
+      .evalMap { file =>
+        for {
+          _ <- logger.info(s"File name: ${file.getName} start reading")
+          content <- SourceConfig
+                      .readContent(file)
                       .handleErrorWith { _ =>
-                        logger.warn(s"Insert data to DB. Some problems: file - ${file.getName}")
+                        logger
+                          .warn(s"Read content. Some problems: file - ${file.getName}")
+                          .map(_ => "")
                       }
-                _ <- logger.info(s"File name: ${file.getName} finish reading")
-              } yield ()
-            }
-            .compile
-            .drain
-    } yield ()
+          data <- repo
+                   .parseContent(content)
+                   .handleErrorWith { _ =>
+                     logger
+                       .warn(s"Parse content. Some problems: file - ${file.getName}")
+                       .map(_ => List.empty)
+                   }
+          _ <- repo
+                .insertDataToArticle(data)
+                .handleErrorWith { _ =>
+                  logger
+                    .warn(s"Insert data to DB. Some problems: file - ${file.getName}")
+                    .map(identity)
+                }
+          _ <- logger.info(s"File name: ${file.getName} finish reading")
+        } yield ExitCode.Success
+      }
+      .compile
+      .lastOrError
 }
 
 object DownloadService {

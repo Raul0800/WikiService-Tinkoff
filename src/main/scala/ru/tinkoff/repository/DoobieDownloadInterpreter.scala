@@ -1,26 +1,19 @@
 package ru.tinkoff.repository
 
-import java.nio.file.{Files, Path}
 import java.time.LocalDateTime
 
 import cats.effect.IO
-import cats.implicits._
 import doobie.Transactor
-import doobie.implicits._
-import doobie.util.Write
-import doobie.util.update.Update
 import io.circe.Decoder
 import io.circe.generic.semiauto._
 import io.circe.parser.parse
 import ru.tinkoff.domain.Article
-//import ru.tinkoff.repository.ContainerRepository._
-import doobie.util.{Read, Write}
+import doobie.util.Write
 import doobie.util.update.Update
 import doobie.postgres._
 import doobie.postgres.implicits._
 import doobie.util.ExecutionContexts
 import cats.implicits._
-//import com.example.domain.Catalog
 import doobie._
 import doobie.implicits._
 import doobie.implicits.javatime._
@@ -43,7 +36,7 @@ object DownloadSQL {
       )
 
   def insertManyArticle(data: List[Article]) = {
-    val sql =
+    val sql: String =
       """insert into public."Articles" (create_timestamp, "timestamp", language,
           wiki, category, title, auxiliary_text)
           values (?, ?, ?, ?, ?, ?, ?)"""

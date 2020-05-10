@@ -15,8 +15,7 @@ class SearchService(repo: DoobieSearchInterpreter)(
       .handleErrorWith { _ =>
         logger
           .warn(s"Search article. Some problems: title - $nameTitle")
-          .unsafeRunSync() //TODO??? как быть, чтобы так не делать
-        IO(List.empty)
+          .map(_ => List.empty)
       }
 }
 

@@ -12,7 +12,7 @@ object StatisticSQL {
   implicit val catalogRead: Read[Catalog] =
     Read[(Array[String], Int)].map { case (a, b) => Catalog(a, b) }
 
-  def getCatalog =
+  def getCatalog: doobie.Query0[Catalog] =
     sql"""
         SELECT category, count
 	        FROM public."Statistic";
@@ -20,14 +20,14 @@ object StatisticSQL {
       .query[Catalog]
 }
 
-class DoobieStatisticRepository(val xa: Transactor[IO]) {
+class DoobieStatisticInterpreter(val xa: Transactor[IO]) {
 
-  def statistic() =
+  def statistic(): IO[List[Catalog]] =
     StatisticSQL.getCatalog
       .to[List]
       .transact[IO](xa)
 }
 
-object DoobieStatisticRepository {
-  def apply(xa: Transactor[IO]): DoobieStatisticRepository = new DoobieStatisticRepository(xa)
+object DoobieStatisticInterpreter {
+  def apply(xa: Transactor[IO]): DoobieStatisticInterpreter = new DoobieStatisticInterpreter(xa)
 }
