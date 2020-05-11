@@ -12,9 +12,9 @@ class DeleteService(repo: DoobieDeleteInterpreter)(
     repo
       .deleteRecord(title)
       .handleErrorWith(
-        _ =>
+        mes =>
           logger
-            .warn(s"Delete article. Some problems: title - $title")
+            .warn(mes)(s"Delete article. Some problems: title - $title")
             .map(_ => -1)
       )
 }

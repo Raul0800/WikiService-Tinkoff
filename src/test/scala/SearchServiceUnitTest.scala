@@ -13,6 +13,13 @@ import scala.concurrent.ExecutionContext
 class SearchServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
   implicit val cs = IO.contextShift(ExecutionContext.global)
 
+  trait TestSearchService {
+    implicit val logger: Logger[IO]         = mock[Logger[IO]]
+    val searchRepo: DoobieSearchInterpreter = mock[DoobieSearchInterpreter]
+
+    val searchService: SearchService = SearchService(searchRepo)(logger)
+  }
+
   val transactor = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver",
     "jdbc:postgresql://localhost:5432/postgres",
@@ -21,20 +28,25 @@ class SearchServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
   )
 
   "Search records with title: Qwerty" should "List.empty" in {
-    val searchRepo      = DoobieSearchInterpreter(transactor)
-    implicit val logger = mock[Logger[IO]]
-
-    val searchService = SearchService(searchRepo)
-    searchService.searchArticle("Qwerty").map(i => i should be(List.empty))
+    val tSearchService = mock[TestSearchService]
+    (tSearchService.searchRepo.findArticleByTitle _)
+      .expects("Qwerty")
+      .returning(
+        DoobieSearchInterpreter(transactor)
+          .findArticleByTitle("Qwerty")
+      )
+    tSearchService.searchService.searchArticle("Qwerty").map(i => i should be(List.empty))
   }
 
   "Search records with title: Бразилия" should "List(Articles)" in {
-    val searchRepo      = DoobieSearchInterpreter(transactor)
-    implicit val logger = mock[Logger[IO]]
+    val tSearchService = mock[TestSearchService]
+    (tSearchService.searchRepo.findArticleByTitle _)
+      .expects("Бразилия")
+      .returning(
+        DoobieSearchInterpreter(transactor)
+          .findArticleByTitle("Бразилия")
+      )
 
-    val searchService = SearchService(searchRepo)
-    val s             = searchService.searchArticle("Бразилия")
-    s.map(i => i.isEmpty should be(false))
-
+    tSearchService.searchService.searchArticle("Бразилия").map(i => i.isEmpty should be(false))
   }
 }

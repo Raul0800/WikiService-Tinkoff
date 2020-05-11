@@ -13,6 +13,13 @@ import scala.concurrent.ExecutionContext
 class StatisticServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
   implicit val cs = IO.contextShift(ExecutionContext.global)
 
+  trait TestStatisticService {
+    implicit val logger: Logger[IO]               = mock[Logger[IO]]
+    val statisticRepo: DoobieStatisticInterpreter = mock[DoobieStatisticInterpreter]
+
+    val statisticService: StatisticService = StatisticService(statisticRepo)(logger)
+  }
+
   val transactor = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver",
     "jdbc:postgresql://localhost:5432/postgres",
@@ -21,10 +28,11 @@ class StatisticServiceUnitTest extends AnyFlatSpec with Matchers with MockFactor
   )
 
   "Statistic" should "not empty List" in {
-    val statisticRepo   = DoobieStatisticInterpreter(transactor)
-    implicit val logger = mock[Logger[IO]]
+    val tStatisticService = mock[TestStatisticService]
+    (tStatisticService.statisticRepo.statistic _)
+      .expects()
+      .returning(DoobieStatisticInterpreter(transactor).statistic())
 
-    val statisticService = StatisticService(statisticRepo)
-    statisticService.statistic.map(i => i.isEmpty should be(false))
+    tStatisticService.statisticService.statistic.map(i => i.isEmpty should be(false))
   }
 }

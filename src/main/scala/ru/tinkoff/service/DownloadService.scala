@@ -26,23 +26,23 @@ class DownloadService(repo: DoobieDownloadInterpreter, source: SourceConfig)(
           _ <- logger.info(s"File name: ${file.getName} start reading")
           content <- SourceConfig
                       .readContent(file)
-                      .handleErrorWith { _ =>
+                      .handleErrorWith { mes =>
                         logger
-                          .warn(s"Read content. Some problems: file - ${file.getName}")
+                          .warn(mes)(s"Read content. Some problems: file - ${file.getName}")
                           .map(_ => "")
                       }
           data <- repo
                    .parseContent(content)
-                   .handleErrorWith { _ =>
+                   .handleErrorWith { mes =>
                      logger
-                       .warn(s"Parse content. Some problems: file - ${file.getName}")
+                       .warn(mes)(s"Parse content. Some problems: file - ${file.getName}")
                        .map(_ => List.empty)
                    }
           _ <- repo
                 .insertDataToArticle(data)
-                .handleErrorWith { _ =>
+                .handleErrorWith { mes =>
                   logger
-                    .warn(s"Insert data to DB. Some problems: file - ${file.getName}")
+                    .warn(mes)(s"Insert data to DB. Some problems: file - ${file.getName}")
                     .map(identity)
                 }
           _ <- logger.info(s"File name: ${file.getName} finish reading")

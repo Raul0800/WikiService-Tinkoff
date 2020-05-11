@@ -12,9 +12,9 @@ class SearchService(repo: DoobieSearchInterpreter)(
   def searchArticle(nameTitle: String): IO[List[SearchArticle]] =
     repo
       .findArticleByTitle(nameTitle)
-      .handleErrorWith { _ =>
+      .handleErrorWith { mes =>
         logger
-          .warn(s"Search article. Some problems: title - $nameTitle")
+          .warn(mes)(s"Search article. Some problems: title - $nameTitle")
           .map(_ => List.empty)
       }
 }

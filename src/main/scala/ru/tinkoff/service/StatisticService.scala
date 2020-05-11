@@ -12,9 +12,9 @@ class StatisticService(repo: DoobieStatisticInterpreter)(
   def statistic: IO[List[Catalog]] =
     repo
       .statistic()
-      .handleErrorWith { _ =>
+      .handleErrorWith { mes =>
         logger
-          .warn(s"Statistic. Some problems")
+          .warn(mes)(s"Statistic. Some problems")
           .map(_ => List.empty)
       }
 }

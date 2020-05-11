@@ -1,5 +1,6 @@
-import cats.effect.{ExitCode, IO}
+import cats.effect.{ContextShift, ExitCode, IO}
 import doobie.util.transactor.Transactor
+import doobie.util.transactor.Transactor.Aux
 import io.chrisdavenport.log4cats.Logger
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.flatspec.AnyFlatSpec
@@ -11,9 +12,16 @@ import ru.tinkoff.service.DownloadService
 import scala.concurrent.ExecutionContext
 
 class DownloadServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
-  implicit val cs = IO.contextShift(ExecutionContext.global)
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-  val transactor = Transactor.fromDriverManager[IO](
+  trait TestDownloadService {
+    implicit val logger: Logger[IO]             = mock[Logger[IO]]
+    val downloadRepo: DoobieDownloadInterpreter = mock[DoobieDownloadInterpreter]
+    val source: SourceConfig                    = SourceConfig(List(""))
+    val downloadService: DownloadService        = DownloadService(downloadRepo, source)(logger)
+  }
+
+  val transactor: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver",
     "jdbc:postgresql://localhost:5432/postgres",
     "postgres",
@@ -21,11 +29,8 @@ class DownloadServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory
   )
 
   "Download records" should "IO(Success)" in {
-    val downloadRepo    = DoobieDownloadInterpreter(transactor)
-    implicit val logger = mock[Logger[IO]]
-    val source          = SourceConfig(List(""))
-    val downloadService = DownloadService(downloadRepo, source)
-    downloadService.download.map(i => i should be(ExitCode.Success))
+    val tDownloadService = mock[TestDownloadService]
+    tDownloadService.downloadService.download.map(i => i should be(ExitCode.Success))
   }
 
   "Parse content string" should "not empty List(Article)" in {
