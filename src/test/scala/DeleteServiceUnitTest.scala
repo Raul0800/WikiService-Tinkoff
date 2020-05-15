@@ -28,17 +28,15 @@ class DeleteServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
     "postgres"
   )
 
-  "Delete one record with name: Abracadabra" should "0" in {
-    val tDelService = mock[TestDeleteService]
-    (tDelService.delRepo.deleteRecord _)
+  "Delete one record with name: Abracadabra" should "0" in new TestDeleteService {
+    (delRepo.deleteRecord _)
       .expects("Abracadabra")
       .returning(DoobieDeleteInterpreter(transactor).deleteRecord("Abracadabra"))
-    tDelService.delService.deleteRecordByTitle("Abracadabra").map(i => i should be(0))
+    delService.deleteRecordByTitle("Abracadabra").map(i => i should be(0))
   }
 
-  "Delete one record with name: Abracadabra, but repo with Fail" should "-1" in {
-    val tDelService = mock[TestDeleteService]
-    (tDelService.delRepo.deleteRecord _).expects("Abracadabra").returning(IO.raiseError(new Exception))
-    tDelService.delService.deleteRecordByTitle("Abracadabra").map(i => i should be(-1))
+  "Delete one record with name: Abracadabra, but repo with Fail" should "-1" in new TestDeleteService {
+    (delRepo.deleteRecord _).expects("Abracadabra").returning(IO.raiseError(new Exception))
+    delService.deleteRecordByTitle("Abracadabra").map(i => i should be(-1))
   }
 }

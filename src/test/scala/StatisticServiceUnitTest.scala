@@ -27,12 +27,11 @@ class StatisticServiceUnitTest extends AnyFlatSpec with Matchers with MockFactor
     "postgres"
   )
 
-  "Statistic" should "not empty List" in {
-    val tStatisticService = mock[TestStatisticService]
-    (tStatisticService.statisticRepo.statistic _)
+  "Statistic" should "not empty List" in new TestStatisticService {
+    (statisticRepo.statistic _)
       .expects()
       .returning(DoobieStatisticInterpreter(transactor).statistic())
 
-    tStatisticService.statisticService.statistic.map(i => i.isEmpty should be(false))
+    statisticService.statistic.map(i => i.isEmpty should be(false))
   }
 }

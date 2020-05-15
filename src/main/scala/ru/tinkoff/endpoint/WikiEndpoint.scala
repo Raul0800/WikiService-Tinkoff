@@ -38,7 +38,7 @@ object WikiEndpoint extends Http4sDsl[IO] {
     case GET -> Root / "delete" / nameTitle =>
       deleteService
         .deleteRecordByTitle(nameTitle)
-        .flatMap(req => Ok({ req.asJson }))
+        .flatMap(req => Ok(req.asJson))
         .handleErrorWith(_ => InternalServerError("Probably database problems"))
   }
 }

@@ -28,9 +28,8 @@ class DownloadServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory
     "postgres"
   )
 
-  "Download records" should "IO(Success)" in {
-    val tDownloadService = mock[TestDownloadService]
-    tDownloadService.downloadService.download.map(i => i should be(ExitCode.Success))
+  "Download records" should "IO(Success)" in new TestDownloadService {
+    downloadService.download.map(i => i should be(ExitCode.Success))
   }
 
   "Parse content string" should "not empty List(Article)" in {

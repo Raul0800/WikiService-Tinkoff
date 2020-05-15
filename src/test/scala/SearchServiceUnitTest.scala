@@ -27,26 +27,24 @@ class SearchServiceUnitTest extends AnyFlatSpec with Matchers with MockFactory {
     "postgres"
   )
 
-  "Search records with title: Qwerty" should "List.empty" in {
-    val tSearchService = mock[TestSearchService]
-    (tSearchService.searchRepo.findArticleByTitle _)
+  "Search records with title: Qwerty" should "List.empty" in new TestSearchService {
+    (searchRepo.findArticleByTitle _)
       .expects("Qwerty")
       .returning(
         DoobieSearchInterpreter(transactor)
           .findArticleByTitle("Qwerty")
       )
-    tSearchService.searchService.searchArticle("Qwerty").map(i => i should be(List.empty))
+    searchService.searchArticle("Qwerty").map(i => i should be(List.empty))
   }
 
-  "Search records with title: Бразилия" should "List(Articles)" in {
-    val tSearchService = mock[TestSearchService]
-    (tSearchService.searchRepo.findArticleByTitle _)
+  "Search records with title: Бразилия" should "List(Articles)" in new TestSearchService {
+    (searchRepo.findArticleByTitle _)
       .expects("Бразилия")
       .returning(
         DoobieSearchInterpreter(transactor)
           .findArticleByTitle("Бразилия")
       )
 
-    tSearchService.searchService.searchArticle("Бразилия").map(i => i.isEmpty should be(false))
+    searchService.searchArticle("Бразилия").map(i => i.isEmpty should be(false))
   }
 }
