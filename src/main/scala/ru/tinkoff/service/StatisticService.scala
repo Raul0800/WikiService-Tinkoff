@@ -15,7 +15,7 @@ class StatisticService(repo: DoobieStatisticInterpreter)(
       .handleErrorWith { mes =>
         logger
           .warn(mes)(s"Statistic. Some problems")
-          .map(_ => List.empty)
+          .flatMap(_ => IO.raiseError(new RuntimeException))
       }
 }
 

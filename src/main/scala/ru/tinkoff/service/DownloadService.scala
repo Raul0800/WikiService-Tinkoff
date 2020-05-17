@@ -29,21 +29,21 @@ class DownloadService(repo: DoobieDownloadInterpreter, source: SourceConfig)(
                       .handleErrorWith { mes =>
                         logger
                           .warn(mes)(s"Read content. Some problems: file - ${file.getName}")
-                          .map(_ => "")
+                          .flatMap(_ => IO.raiseError(new RuntimeException))
                       }
           data <- repo
                    .parseContent(content)
                    .handleErrorWith { mes =>
                      logger
                        .warn(mes)(s"Parse content. Some problems: file - ${file.getName}")
-                       .map(_ => List.empty)
+                       .flatMap(_ => IO.raiseError(new RuntimeException))
                    }
           _ <- repo
                 .insertDataToArticle(data)
                 .handleErrorWith { mes =>
                   logger
                     .warn(mes)(s"Insert data to DB. Some problems: file - ${file.getName}")
-                    .map(identity)
+                    .flatMap(_ => IO.raiseError(new RuntimeException))
                 }
           _ <- logger.info(s"File name: ${file.getName} finish reading")
         } yield ExitCode.Success

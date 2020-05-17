@@ -15,7 +15,7 @@ class SearchService(repo: DoobieSearchInterpreter)(
       .handleErrorWith { mes =>
         logger
           .warn(mes)(s"Search article. Some problems: title - $nameTitle")
-          .map(_ => List.empty)
+          .flatMap(_ => IO.raiseError(new RuntimeException))
       }
 }
 

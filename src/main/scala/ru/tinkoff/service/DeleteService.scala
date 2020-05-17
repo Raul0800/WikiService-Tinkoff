@@ -15,7 +15,7 @@ class DeleteService(repo: DoobieDeleteInterpreter)(
         mes =>
           logger
             .warn(mes)(s"Delete article. Some problems: title - $title")
-            .map(_ => -1)
+            .flatMap(_ => IO.raiseError(new RuntimeException))
       )
 }
 
